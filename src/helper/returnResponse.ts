@@ -1,9 +1,9 @@
 export type ReturnResponseType<T> =
 {
         is_successful:boolean,
-        response:T,
         error_msg:string,
         success:string
+        response:T
 }
 
 export default function ReturnResponse(response?:any,error?:any, success?:string)

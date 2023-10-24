@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadGatewayException, ConflictException, Injectable } from '@nestjs/common';
 import ReturnResponse from 'src/helper/returnResponse';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcryptjs"
@@ -13,12 +13,18 @@ interface SignupParams
     phone:string
 }
 
+interface SigninParams
+{
+    email:string
+    password:string
+}
+
 @Injectable()
 export class AuthService 
 {
     constructor( private readonly prismaSirvce:PrismaService){}
     
-    async signup({email, password,name, phone}:SignupParams)
+    async signup({email, password,name, phone}:SignupParams, userType:UserType)
     {
         const userExists = await this.prismaSirvce.user.findUnique(
             {
@@ -43,16 +49,52 @@ export class AuthService
                         name:name,
                         phone:phone,
                         password:hashedPassword,
-                        user_type: UserType.BUYER
+                        user_type: userType
                     }
                 })
 
-                const token = await jwt.sign(
-                    {
-                        name,
-                        id:user?.id
-                    },process.env.JSON_TOKEN_KEY,{expiresIn:3600000})
+                const token = await this.generateJWT(user?.email,user?.id)
 
                 return ReturnResponse({user_token: token},'',"User Created Successfully")       
+    }
+
+    async signin({email,password}:SigninParams)
+    {
+        const getUserByEmail = await this.prismaSirvce.user.findUnique(
+            {
+                where:
+                {
+                    email
+                },
+            })
+
+            const isValidPassword = await bcrypt.compare(password, getUserByEmail?.password)
+
+            if (getUserByEmail && isValidPassword)
+            {
+                const token = await this.generateJWT(getUserByEmail?.email,getUserByEmail?.id)
+
+                return ReturnResponse({user_token: token},'',"")   
+            }
+            else
+            {
+                throw new BadGatewayException(ReturnResponse({},"Email or Password incorrect"))
+            }
+    }
+
+    private async generateJWT( name:string, id:number )
+    {
+        return jwt.sign(
+            {
+                name:name,
+                id:id
+            },process.env.JSON_TOKEN_KEY,{expiresIn:3600000})
+    }
+
+    async generateProductKey(email:string, userType:UserType)
+    {
+        const string = `${email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`
+
+        return ReturnResponse({token: await bcrypt.hash(string,10)})
     }
 }

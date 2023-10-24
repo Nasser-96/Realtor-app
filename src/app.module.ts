@@ -5,9 +5,10 @@ import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CustomInterceptor } from './custom.interceptor';
 import { PrismaModule } from './prisma/prisma.module';
+import { HomeModule } from './home/home.module';
 
 @Module({
-  imports: [UserModule, PrismaModule],
+  imports: [UserModule, PrismaModule, HomeModule],
   controllers: [AppController],
   providers: [
     AppService,
