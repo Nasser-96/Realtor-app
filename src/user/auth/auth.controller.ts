@@ -4,6 +4,7 @@ import { GenerateProductKeyDto, SigninDto, SignupDto } from 'src/user/dtos/auth.
 import { UserType } from '@prisma/client';
 import * as bcrypt from "bcryptjs"
 import ReturnResponse from 'src/helper/returnResponse';
+import { User, UserTypeDecorator } from '../decorators/user.decorator';
 
 @Controller('auth')
 export class AuthController 
@@ -41,5 +42,11 @@ export class AuthController
     generateProductKey(@Body() body:GenerateProductKeyDto)
     {
         return this?.authService.generateProductKey(body?.email,body?.userType)
+    }
+
+    @Get("/me")
+    me(@User() user:UserTypeDecorator)
+    {
+        return ReturnResponse(user)
     }
 }

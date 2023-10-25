@@ -53,7 +53,7 @@ export class AuthService
                     }
                 })
 
-                const token = await this.generateJWT(user?.email,user?.id)
+                const token = await this.generateJWT(user?.email)
 
                 return ReturnResponse({user_token: token},'',"User Created Successfully")       
     }
@@ -72,7 +72,7 @@ export class AuthService
 
             if (getUserByEmail && isValidPassword)
             {
-                const token = await this.generateJWT(getUserByEmail?.email,getUserByEmail?.id)
+                const token = await this.generateJWT(getUserByEmail?.email)
 
                 return ReturnResponse({user_token: token},'',"")   
             }
@@ -82,12 +82,11 @@ export class AuthService
             }
     }
 
-    private async generateJWT( name:string, id:number )
+    private async generateJWT( name:string )
     {
         return jwt.sign(
             {
-                name:name,
-                id:id
+                name:name
             },process.env.JSON_TOKEN_KEY,{expiresIn:3600000})
     }
 

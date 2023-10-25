@@ -1,9 +1,9 @@
-import { BadGatewayException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadGatewayException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import ReturnResponse, { ReturnResponseType } from 'src/helper/returnResponse';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HomeResponseDto } from './dto/home.dto';
 import { PropertyType } from '@prisma/client';
-import { NotFoundError } from 'rxjs';
+import { NotFoundError, throwError } from 'rxjs';
 
 
 interface  GetHomesParams
@@ -114,11 +114,22 @@ export class HomeService
         return ReturnResponse(new HomeResponseDto({...home,image:home?.images[0]?.url}));
     }
 
-    async createHome({address,city,images,land_size,number_of_bathrooms,number_of_bedrooms,price,property_type}:CreateHomeParams)
+    async createHome({address,city,images,land_size,number_of_bathrooms,number_of_bedrooms,price,property_type}:CreateHomeParams, email:string)
     {
-        try
+        if(!email)
         {
+            throw new NotFoundException(ReturnResponse({},"Missing or Invalid User"));
+        }
 
+        const userData = await this.prismaService?.user?.findUnique({where:{email:email}});
+        
+        if(userData?.user_type === "BUYER")
+        {
+            throw new UnauthorizedException(ReturnResponse({},"This User Not Allowed to Create Home"))
+        }
+
+        try
+        {   
             const home = await this.prismaService?.home?.create(
                 {
                     data:
@@ -130,7 +141,7 @@ export class HomeService
                         number_of_bedrooms,
                         price,
                         property_type,
-                        realtor_id:14
+                        realtor_id:userData?.id
                     }
                 })
     
@@ -146,7 +157,7 @@ export class HomeService
         }
         catch(e)
         {
-            throw new BadGatewayException(ReturnResponse('',e))
+            throw new BadGatewayException(ReturnResponse('',"Data Base Error"))
         }
     }
 
@@ -183,5 +194,35 @@ export class HomeService
         )
         await this.prismaService?.home?.delete({where:{id}})
         return ReturnResponse({},'','Home deleted  successfully')
+    }
+
+    async getRealtorByhomeId(id:number)
+    {
+
+        const home = await this.prismaService?.home?.findUnique(
+            {
+                where:{id:id},
+                select:
+                {
+                    realtor:
+                    {
+                        select:
+                        {
+                            name:true,
+                            email:true,
+                            phone:true,
+                            id:true
+                        }
+                    }
+                }
+            }
+        );
+
+        if(!home)
+        {
+            throw new NotFoundException(ReturnResponse({},"Home not found"))
+        }
+
+        return home?.realtor
     }
 }

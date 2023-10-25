@@ -6,6 +6,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CustomInterceptor } from './custom.interceptor';
 import { PrismaModule } from './prisma/prisma.module';
 import { HomeModule } from './home/home.module';
+import { UserInterceptor } from './user/interceptors/user.interceptor';
 
 @Module({
   imports: [UserModule, PrismaModule, HomeModule],
@@ -14,7 +15,7 @@ import { HomeModule } from './home/home.module';
     AppService,
     {
       provide:APP_INTERCEPTOR,
-      useClass:CustomInterceptor
+      useClass:UserInterceptor
     }
   ],
 })
