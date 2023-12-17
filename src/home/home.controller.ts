@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException, UseGuards } from '@nestjs/common';
 import ReturnResponse, {ReturnResponseType} from 'src/helper/returnResponse';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
 import { PropertyType, UserType } from '@prisma/client';
 import { User, UserTypeDecorator } from 'src/user/decorators/user.decorator';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('home')
 export class HomeController 
@@ -44,10 +45,12 @@ export class HomeController
     }
 
     // @Role(UserType?.REALTOR, UserType?.ADMIN)
+    @UseGuards(AuthGuard)
     @Post()
     createHome(@Body() body:CreateHomeDto, @User() user:UserTypeDecorator)
     {
-        return this.homeService?.createHome(body, user?.name)
+        return ReturnResponse("GGs")
+        // return this.homeService?.createHome(body, user?.name);
     }
 
     @Put(":id")
