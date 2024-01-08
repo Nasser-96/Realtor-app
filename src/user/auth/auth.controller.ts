@@ -47,6 +47,6 @@ export class AuthController
     @Get("/me")
     me(@User() user:UserTypeDecorator)
     {
-        return ReturnResponse(user)
+        return ReturnResponse(user ? user : '',user ? user : 'User Not Found')
     }
 }

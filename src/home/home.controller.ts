@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
 import ReturnResponse, {ReturnResponseType} from 'src/helper/returnResponse';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
 import { PropertyType, UserType } from '@prisma/client';
 import { User, UserTypeDecorator } from 'src/user/decorators/user.decorator';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('home')
 export class HomeController 
@@ -44,15 +45,14 @@ export class HomeController
         return this.homeService?.getHomeById(id)
     }
 
-    // @Role(UserType?.REALTOR, UserType?.ADMIN)
-    @UseGuards(AuthGuard)
+    @Roles(UserType.REALTOR, UserType.ADMIN)
     @Post()
     createHome(@Body() body:CreateHomeDto, @User() user:UserTypeDecorator)
     {
-        return ReturnResponse("GGs")
-        // return this.homeService?.createHome(body, user?.name);
+        return this.homeService?.createHome(body, user?.name);
     }
 
+    @Roles(UserType.REALTOR, UserType.ADMIN)
     @Put(":id")
     async updateHome(@Param("id",ParseIntPipe)id:number, @Body() body:UpdateHomeDto, @User() user:UserTypeDecorator )
     {
@@ -60,12 +60,13 @@ export class HomeController
 
         if(realtor?.email !== user?.name )
         {
-            throw new UnauthorizedException(ReturnResponse({},"You are not Allowed not update this home"))
+            throw new UnauthorizedException(ReturnResponse({},"You are not Allowed to update this home"))
         }
         
         return this.homeService?.updateHome(id,body)
     }
 
+    @Roles(UserType.REALTOR, UserType.ADMIN)
     @Delete(":id")
     async deleteHome(@Param("id",ParseIntPipe)id:number, @User() user:UserTypeDecorator)
     {
