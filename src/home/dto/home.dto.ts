@@ -117,3 +117,10 @@ import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString
     @IsEnum(PropertyType)
     property_type?:PropertyType;
  }
+
+ export class InquireDto 
+ {
+   @IsString()
+   @IsNotEmpty()
+   message:string
+ }

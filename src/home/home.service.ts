@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { HomeResponseDto } from './dto/home.dto';
 import { PropertyType } from '@prisma/client';
 import { NotFoundError, throwError } from 'rxjs';
+import { UserTypeDecorator } from 'src/user/decorators/user.decorator';
 
 
 interface  GetHomesParams
@@ -224,5 +225,10 @@ export class HomeService
         }
 
         return home?.realtor
+    }
+
+    inquire(user:UserTypeDecorator,homeId,message)
+    {
+        // const realtor = 
     }
 }

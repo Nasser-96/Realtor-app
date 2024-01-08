@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
 import ReturnResponse, {ReturnResponseType} from 'src/helper/returnResponse';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
+import { CreateHomeDto, HomeResponseDto, InquireDto, UpdateHomeDto } from './dto/home.dto';
 import { PropertyType, UserType } from '@prisma/client';
 import { User, UserTypeDecorator } from 'src/user/decorators/user.decorator';
 import { AuthGuard } from 'src/guards/auth.guard';
@@ -78,5 +78,11 @@ export class HomeController
         }
 
         return this.homeService?.deleteHome(id)
+    }
+
+    @Post('/inquire/:id')
+    inquire(@Param("id",ParseIntPipe) homeId:number, @User() user:UserTypeDecorator, @Body() {message}:InquireDto)
+    {
+        return this.homeService.inquire(user,homeId,message)
     }
 }
