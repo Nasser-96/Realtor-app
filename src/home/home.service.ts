@@ -197,7 +197,7 @@ export class HomeService
         return ReturnResponse({},'','Home deleted  successfully')
     }
 
-    async getRealtorByhomeId(id:number)
+    async getRealtorByHomeId(id:number)
     {
 
         const home = await this.prismaService?.home?.findUnique(
@@ -227,8 +227,54 @@ export class HomeService
         return home?.realtor
     }
 
-    inquire(user:UserTypeDecorator,homeId,message)
+    async inquire(buyer:UserTypeDecorator,homeId,message)
     {
-        // const realtor = 
+        const realtor = await this.getRealtorByHomeId(homeId)
+
+        const createdMessage = await this.prismaService.message.create(
+            {
+                data:
+                {
+                    realtor_id:realtor.id,
+                    buyer_id:buyer.id,
+                    home_id:homeId,
+                    message
+                }
+            })
+
+        if(createdMessage)
+        {
+            return ReturnResponse("Message Created Successfully")
+        }
+        else
+        {
+            throw new BadGatewayException(ReturnResponse('',"Data Base Error"))
+        }
+    }
+
+    async getHomeMessages(homeId:number)
+    {
+        const messages = await this.prismaService.message.findMany(
+            {
+                where: 
+                {
+                    home_id:homeId
+                },
+                select:
+                {
+                    buyer:{
+                        select:
+                        {
+                            name:true,
+                            email:true,
+                            phone:true,
+                        }
+                    },
+                    message:true
+                }
+            }
+            )
+
+        return ReturnResponse(messages);
     }
 }

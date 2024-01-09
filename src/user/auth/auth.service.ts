@@ -53,7 +53,7 @@ export class AuthService
                     }
                 })
 
-                const token = await this.generateJWT(user?.email)
+                const token = await this.generateJWT(user?.email,user.id)
 
                 return ReturnResponse({user_token: token},'',"User Created Successfully")       
     }
@@ -68,11 +68,15 @@ export class AuthService
                 },
             })
 
-            const isValidPassword = await bcrypt.compare(password, getUserByEmail?.password)
+            if(!getUserByEmail)
+            {
+                throw new BadGatewayException(ReturnResponse({},"Email or Password incorrect"))
+            }
+            const isValidPassword = await bcrypt?.compare(password, getUserByEmail?.password)
 
             if (getUserByEmail && isValidPassword)
             {
-                const token = await this.generateJWT(getUserByEmail?.email)
+                const token = await this.generateJWT(getUserByEmail?.email,getUserByEmail?.id)
 
                 return ReturnResponse({user_token: token},'',"")   
             }
@@ -82,11 +86,12 @@ export class AuthService
             }
     }
 
-    private async generateJWT( name:string )
+    private async generateJWT( name:string,id?:number )
     {
         return jwt.sign(
             {
-                name:name
+                name:name,
+                id:id
             },process.env.JSON_TOKEN_KEY,{expiresIn:3600000})
     }
 

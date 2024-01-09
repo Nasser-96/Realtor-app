@@ -56,7 +56,7 @@ export class HomeController
     @Put(":id")
     async updateHome(@Param("id",ParseIntPipe)id:number, @Body() body:UpdateHomeDto, @User() user:UserTypeDecorator )
     {
-        const realtor = await this?.homeService?.getRealtorByhomeId(id);
+        const realtor = await this?.homeService?.getRealtorByHomeId(id);
 
         if(realtor?.email !== user?.name )
         {
@@ -70,7 +70,7 @@ export class HomeController
     @Delete(":id")
     async deleteHome(@Param("id",ParseIntPipe)id:number, @User() user:UserTypeDecorator)
     {
-        const realtor = await this?.homeService?.getRealtorByhomeId(id);
+        const realtor = await this?.homeService?.getRealtorByHomeId(id);
 
         if(realtor?.email !== user?.name )
         {
@@ -80,9 +80,24 @@ export class HomeController
         return this.homeService?.deleteHome(id)
     }
 
+    @Roles(UserType.BUYER)
     @Post('/inquire/:id')
     inquire(@Param("id",ParseIntPipe) homeId:number, @User() user:UserTypeDecorator, @Body() {message}:InquireDto)
     {
         return this.homeService.inquire(user,homeId,message)
+    }
+
+    @Roles(UserType.REALTOR)
+    @Get('/:id/messages')
+    async getHomeMessages(@Param("id",ParseIntPipe) id:number, @User() user:UserTypeDecorator,)
+    {
+        const realtor = await this.homeService.getRealtorByHomeId(id);
+
+        if(realtor.id !== user.id)
+        {
+            throw new UnauthorizedException(ReturnResponse({},"You are not Allowed not see this conversation"))
+        }
+
+        return this.homeService.getHomeMessages(id)
     }
 }

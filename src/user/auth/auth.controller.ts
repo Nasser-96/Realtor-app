@@ -18,7 +18,7 @@ export class AuthController
         {
             if(!body.product_key)
             {
-                throw new UnauthorizedException(ReturnResponse({},"Unauthorized"))
+                throw new UnauthorizedException(ReturnResponse({},"Unauthorized 1"))
             }
             const validProductKey = `${body.email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`
 
@@ -26,7 +26,7 @@ export class AuthController
 
             if(!isValidProductKey)
             {
-                throw new UnauthorizedException(ReturnResponse({},"Unauthorized"))
+                throw new UnauthorizedException(ReturnResponse({},"Unauthorized 2"))
             }
         }
         return this.authService?.signup(body,userType)
