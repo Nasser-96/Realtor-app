@@ -4,7 +4,6 @@ import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, InquireDto, UpdateHomeDto } from './dto/home.dto';
 import { PropertyType, UserType } from '@prisma/client';
 import { User, UserTypeDecorator } from 'src/user/decorators/user.decorator';
-import { AuthGuard } from 'src/guards/auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('home')

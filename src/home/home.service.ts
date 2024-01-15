@@ -41,6 +41,16 @@ interface UpdateHomeParams
     property_type?:PropertyType;
 }
 
+export const homeSelect = 
+{
+    id:true,
+    address:true,
+    city:true,
+    price:true,
+    property_type:true,
+    number_of_bathrooms:true,
+    number_of_bedrooms:true,
+}
 @Injectable()
 export class HomeService 
 {
@@ -52,13 +62,7 @@ export class HomeService
             {
                 select:
                 {
-                    id:true,
-                    address:true,
-                    city:true,
-                    price:true,
-                    property_type:true,
-                    number_of_bathrooms:true,
-                    number_of_bedrooms:true,
+                    ...homeSelect,
                     images:
                     {
                         select: 
@@ -84,7 +88,7 @@ export class HomeService
 
     async getHomeById(id:number)
     {
-        const home = await this.prismaService?.home?.findUnique(
+        const home = await this.prismaService.home.findUnique(
             {
                 select:
                 {
@@ -105,6 +109,7 @@ export class HomeService
                 },
                 where:{id:id}
             }
+            // stmt = select(distinct(home.name)).where(home.id == id)
         );
 
         if(!home)
